@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Purchase</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="container mx-auto mt-8">
+        <div class="grid grid-cols-3 gap-4">
+            <!-- Product Cards -->
+            <div class="border p-4 cursor-pointer" onclick="addToCart('Product 1', 100)">
+                <h2 class="font-semibold">Product 1</h2>
+            </div>
+            <!-- Repeat the above block for other products -->
+            <!-- ... -->
+
+            <!-- Cart Section -->
+            <div class="col-span-3 mt-8">
+                <h2 class="font-semibold">Cart</h2>
+                <div id="cart" class="border p-4 mt-2"></div>
+                <p>Total Price: $<span id="totalPrice">0.00</span></p>
+                <div class="mt-2">
+                    <input type="text" id="couponInput" class="border p-2" placeholder="Enter coupon code">
+                    <button class="bg-blue-500 text-white px-4 py-2"  onclick="applyCoupon()">Apply Coupon</button>
+                </div>
+                <p>Discount: <span id="discount">0%</span></p>
+                <p>Price after Discount: $<span id="priceAfterDiscount">0.00</span></p>
+                <button id="purchaseBtn" class="bg-pink-500 text-white px-4 py-2 mt-4 hidden" disabled
+                    onclick="showCongratulationsModal()">Purchase</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Congratulations Modal -->
+    <div id="congratulationsModal" class="fixed inset-0 flex items-center justify-center hidden">
+        <div class="bg-white p-8 rounded shadow-lg">
+            <h3 class="text-lg font-semibold mb-2">Congratulations!</h3>
+            <p>Your purchase was successful.</p>
+            <button class="bg-pink-500 text-white px-4 py-2 mt-4" onclick="resetCartAndHideModal()">Go Home</button>
+        </div>
+    </div>
+
+    <script>
+        const cart = [];
+        let totalPrice = 0;
+        let couponApplied = false;
+
+        function addToCart(productName, price) {
+            const cartItem = {
+                productName,
+                price,
+            };
+            cart.push(cartItem);
+            totalPrice += price;
+
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartDiv = document.getElementById("cart");
+            cartDiv.innerHTML = "";
+
+            cart.forEach(item => {
+                const itemDiv = document.createElement("div");
+                itemDiv.classList.add("mb-2");
+                itemDiv.innerHTML = `
+        <p>${item.productName}</p>
+        <p>Price: $${item.price.toFixed(2)}</p>
+      `;
+                cartDiv.appendChild(itemDiv);
+            });
+
+            const totalSpan = document.getElementById("totalPrice");
+            totalSpan.textContent = totalPrice.toFixed(2);
+
+            updatePurchaseButton();
+        }
+
+        function applyCoupon() {
+            const couponInput = document.getElementById("couponInput");
+            const couponCode = couponInput.value;
+
+            if (couponCode === "SELL200" && totalPrice >= 200) {
+                couponApplied = true;
+                const discountSpan = document.getElementById("discount");
+                discountSpan.textContent = "20%";
+
+                const priceAfterDiscountSpan = document.getElementById("priceAfterDiscount");
+                const discountedPrice = totalPrice * 0.8; // 20% discount
+                priceAfterDiscountSpan.textContent = discountedPrice.toFixed(2);
+            } else {
+                couponApplied = false;
+                const discountSpan = document.getElementById("discount");
+                discountSpan.textContent = "0%";
+
+                const priceAfterDiscountSpan = document.getElementById("priceAfterDiscount");
+                priceAfterDiscountSpan.textContent = totalPrice.toFixed(2);
+            }
+
+            updatePurchaseButton();
+        }
+
+        function updatePurchaseButton() {
+            const purchaseBtn = document.getElementById("purchaseBtn");
+            if (couponApplied && totalPrice > 0) {
+                purchaseBtn.removeAttribute("disabled");
+                purchaseBtn.classList.remove("hidden");
+            } else {
+                purchaseBtn.setAttribute("disabled", "true");
+                purchaseBtn.classList.add("hidden");
+            }
+        }
+
+        function showCongratulationsModal() {
+            const modal = document.getElementById("congratulationsModal");
+            modal.classList.remove("hidden");
+        }
+
+        function resetCartAndHideModal() {
+            cart.length = 0;
+            totalPrice = 0;
+            couponApplied = false;
+            const couponInput = document.getElementById("couponInput");
+            couponInput.value = "";
+
+            const discountSpan = document.getElementById("discount");
+            discountSpan.textContent = "0%";
+
+            const priceAfterDiscountSpan = document.getElementById("priceAfterDiscount");
+            priceAfterDiscountSpan.textContent = "0.00";
+
+            updateCart();
+
+            const modal = document.getElementById("congratulationsModal");
+            modal.classList.add("hidden");
+        }
+    </script>
+
+</body>
+
+</html>
